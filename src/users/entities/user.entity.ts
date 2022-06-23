@@ -28,5 +28,5 @@ export class User {
   updatedDate: Date;
 
   @DeleteDateColumn()
-  deletedDate: Date;
+  deletedDate?: Date;
 }
