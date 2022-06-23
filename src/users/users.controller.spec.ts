@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import Mock = jest.Mock;
+import { faker } from '@faker-js/faker';
 
 describe('UsersController', () => {
   let service: UsersService;
-  let mockRepository: Mock<Repository<User>>;
   let controller: UsersController;
 
   beforeEach(async () => {
@@ -18,12 +16,11 @@ describe('UsersController', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useFactory: repositoryMockFactory,
+          useFactory: jest.fn(),
         },
       ],
     }).compile();
 
-    mockRepository = module.get(getRepositoryToken(User));
     service = module.get<UsersService>(UsersService);
     controller = module.get<UsersController>(UsersController);
   });
@@ -31,20 +28,29 @@ describe('UsersController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  it('findAll method returns users array.', async () => {
+    const expected = generateMockUser(3);
+    jest.spyOn(service, 'findAll').mockImplementation(async () => expected);
+
+    const res = await controller.findAll();
+    expect(res.length).toBe(3);
+    expect(res).toEqual(expected);
+  });
 });
 
-// @ts-ignore
-export const repositoryMockFactory: () => Mock<Repository<User>> = jest.fn(
-  () => ({
-    findOne: jest.fn((id: number) => mockUser),
-  }),
-);
+const generateMockUser = (count: number) => {
+  const users: User[] = [];
+  for (let i = 0; i < count; i++) {
+    users.push({
+      id: faker.datatype.number(),
+      firstName: faker.name.firstName(),
+      lastName: faker.name.lastName(),
+      isActive: faker.datatype.boolean(),
+      createdDate: new Date(),
+      updatedDate: new Date(),
+    });
+  }
 
-const mockUser: User = {
-  id: 9999,
-  firstName: 'testfirst',
-  lastName: 'testlast',
-  isActive: true,
-  createdDate: new Date('1995-12-17T03:24:00'),
-  updatedDate: new Date('1995-12-17T03:24:00'),
+  return users;
 };
