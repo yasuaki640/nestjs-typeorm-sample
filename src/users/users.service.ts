@@ -29,13 +29,6 @@ export class UsersService {
     return await this.usersRepository.save(dto);
   }
 
-  async remove(id: number): Promise<void> {
-    const res = await this.usersRepository.softDelete(id);
-    if (res.affected === 0) {
-      throw new NotFoundException('Specified user id does not exists.');
-    }
-  }
-
   async update(id: number, dto: UpdateUserDto): Promise<User> {
     const res = await this.usersRepository.update(id, dto);
     if (res.affected === 0) {
@@ -43,5 +36,12 @@ export class UsersService {
     }
 
     return await this.usersRepository.findOne({ where: { id } });
+  }
+
+  async remove(id: number): Promise<void> {
+    const res = await this.usersRepository.softDelete(id);
+    if (res.affected === 0) {
+      throw new NotFoundException('Specified user id does not exists.');
+    }
   }
 }

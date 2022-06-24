@@ -7,6 +7,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { faker } from '@faker-js/faker';
 import { CreateUserDto } from './dto/create-user.dto';
 import { NotFoundException } from '@nestjs/common';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 describe('UsersController', () => {
   let mockRepository: Repository<User>;
@@ -64,6 +65,38 @@ describe('UsersController', () => {
 
     const dto = generateCreateUserDto();
     expect(await controller.create(dto)).toEqual(expect.objectContaining(dto));
+  });
+
+  it('update method returns not found error when specified user does not exists.', async () => {
+    jest
+      .spyOn(mockRepository, 'update')
+      .mockImplementation(async (id: number, dto: UpdateUserDto) => ({
+        raw: null,
+        affected: 0,
+        generatedMaps: [],
+      }));
+
+    const dto = generateCreateUserDto();
+
+    await expect(() => {
+      return controller.update('1234567890', dto);
+    }).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
+  });
+
+  it('update method returns not found error when specified user does not exists.', async () => {
+    jest
+      .spyOn(mockRepository, 'update')
+      .mockImplementation(async (id: number, dto: UpdateUserDto) => ({
+        raw: --id,
+        affected: 1,
+        generatedMaps: [],
+      }));
+
+    const dto: UpdateUserDto = { firstName: faker.name.firstName() };
+
+    await expect(() => {
+      return controller.update('1234567890', dto);
+    }).rejects.not.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
   });
 
   it('remove method returns not found error when specified user does not exists.', async () => {
