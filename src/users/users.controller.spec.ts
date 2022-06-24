@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { faker } from '@faker-js/faker';
+import { CreateUserDto } from './dto/create-user.dto';
 
 describe('UsersController', () => {
   let mockRepository: Repository<User>;
@@ -54,6 +55,15 @@ describe('UsersController', () => {
 
     expect(await controller.findOne(user.id.toString())).toEqual(user);
   });
+
+  it('create method returns user entity when user is successfully created.', async () => {
+    jest
+      .spyOn(mockRepository, 'save')
+      .mockImplementation(async (dto: CreateUserDto) => toUserEntity(dto));
+
+    const dto = generateCreateUserDto();
+    expect(await controller.create(dto)).toEqual(expect.objectContaining(dto));
+  });
 });
 
 const generateMockUser = (count = 1) => {
@@ -71,3 +81,24 @@ const generateMockUser = (count = 1) => {
 
   return users;
 };
+
+const generateCreateUserDto: () => CreateUserDto = () => ({
+  firstName: faker.name.firstName(),
+  lastName: faker.name.lastName(),
+  isActive: faker.datatype.boolean(),
+});
+
+const toCreateDto: (User) => CreateUserDto = (user) => ({
+  firstName: user.firstName,
+  lastName: user.lastName,
+  isActive: user.isActive,
+});
+
+const toUserEntity: (CreateUserDto) => User = (dto) => ({
+  id: faker.datatype.number(),
+  firstName: dto.firstName,
+  lastName: dto.lastName,
+  isActive: dto.isActive,
+  createdDate: new Date(),
+  updatedDate: new Date(),
+});
