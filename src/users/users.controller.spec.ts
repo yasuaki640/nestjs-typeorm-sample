@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { faker } from '@faker-js/faker';
@@ -61,7 +61,7 @@ describe('UsersController', () => {
   it('create method returns user entity when user is successfully created.', async () => {
     jest
       .spyOn(mockRepository, 'save')
-      .mockImplementation(async (dto: CreateUserDto) => toUserEntity(dto));
+      .mockImplementation(async (dto) => toUserEntity(dto));
 
     const dto = generateCreateUserDto();
     expect(await controller.create(dto)).toEqual(expect.objectContaining(dto));
@@ -70,7 +70,7 @@ describe('UsersController', () => {
   it('update method returns not found error when specified user does not exists.', async () => {
     jest
       .spyOn(mockRepository, 'update')
-      .mockImplementation(async (id: number, dto: UpdateUserDto) => ({
+      .mockImplementation(async (id, dto) => ({
         raw: null,
         affected: 0,
         generatedMaps: [],
@@ -83,30 +83,38 @@ describe('UsersController', () => {
     }).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
   });
 
-  it('update method returns not found error when specified user does not exists.', async () => {
+  it('update method executed successfully.', async () => {
     jest
       .spyOn(mockRepository, 'update')
-      .mockImplementation(async (id: number, dto: UpdateUserDto) => ({
-        raw: --id,
+      .mockImplementation(async (id, dto) => ({
+        raw: id,
         affected: 1,
-        generatedMaps: [],
+        generatedMaps: [dto],
       }));
 
-    const dto: UpdateUserDto = { firstName: faker.name.firstName() };
+    jest
+      .spyOn(mockRepository, 'findOne')
+      //@ts-ignore
+      .mockImplementation(async ({ where: { id } }: FindOneOptions<User>) => {
+        const user = generateMockUser().pop();
+        user.id = id;
 
-    await expect(() => {
-      return controller.update('1234567890', dto);
-    }).rejects.not.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
+        return user;
+      });
+
+    const user: User = generateMockUser().pop();
+    const dto: UpdateUserDto = { firstName: faker.name.firstName() };
+    const res = await controller.update(user.id.toString(), dto);
+
+    expect(res.id).toEqual(user.id);
   });
 
   it('remove method returns not found error when specified user does not exists.', async () => {
-    jest
-      .spyOn(mockRepository, 'softDelete')
-      .mockImplementation(async (id: number) => ({
-        raw: null,
-        affected: 0,
-        generatedMaps: [],
-      }));
+    jest.spyOn(mockRepository, 'softDelete').mockImplementation(async (id) => ({
+      raw: null,
+      affected: 0,
+      generatedMaps: [],
+    }));
 
     await expect(() => {
       return controller.remove('1234567890');
@@ -114,13 +122,11 @@ describe('UsersController', () => {
   });
 
   it('remove method returns not found error when specified user does not exists.', async () => {
-    jest
-      .spyOn(mockRepository, 'softDelete')
-      .mockImplementation(async (id: number) => ({
-        raw: --id,
-        affected: 1,
-        generatedMaps: [],
-      }));
+    jest.spyOn(mockRepository, 'softDelete').mockImplementation(async (id) => ({
+      raw: id,
+      affected: 1,
+      generatedMaps: [],
+    }));
 
     await expect(() => {
       return controller.remove('1234567890');
@@ -148,12 +154,6 @@ const generateCreateUserDto: () => CreateUserDto = () => ({
   firstName: faker.name.firstName(),
   lastName: faker.name.lastName(),
   isActive: faker.datatype.boolean(),
-});
-
-const toCreateDto: (User) => CreateUserDto = (user) => ({
-  firstName: user.firstName,
-  lastName: user.lastName,
-  isActive: user.isActive,
 });
 
 const toUserEntity: (CreateUserDto) => User = (dto) => ({
