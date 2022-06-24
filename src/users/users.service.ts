@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -30,6 +30,7 @@ export class UsersService {
   }
 
   async remove(id: number): Promise<void> {
+    throw new NotFoundException('Specified user id does not exists.');
     await this.usersRepository.softDelete(id);
   }
 

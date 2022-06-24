@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { faker } from '@faker-js/faker';
 import { CreateUserDto } from './dto/create-user.dto';
+import { NotFoundException } from '@nestjs/common';
 
 describe('UsersController', () => {
   let mockRepository: Repository<User>;
@@ -44,7 +45,7 @@ describe('UsersController', () => {
     jest.spyOn(mockRepository, 'findOne').mockImplementation(async () => null);
     await expect(() => {
       return controller.findOne('1234567890');
-    }).rejects.toThrow(); // https://jestjs.io/docs/asynchronous#resolves--rejects
+    }).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
   });
 
   it('findOne method returns a user.', async () => {
@@ -63,6 +64,20 @@ describe('UsersController', () => {
 
     const dto = generateCreateUserDto();
     expect(await controller.create(dto)).toEqual(expect.objectContaining(dto));
+  });
+
+  it('remove method returns not found error when specified user does not exists.', async () => {
+    jest
+      .spyOn(mockRepository, 'softDelete')
+      .mockImplementation(async (id: number) => ({
+        raw: null,
+        affected: null,
+        generatedMaps: [],
+      }));
+
+    await expect(() => {
+      return controller.remove('1234567890');
+    }).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
   });
 });
 
