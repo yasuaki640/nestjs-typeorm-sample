@@ -30,8 +30,10 @@ export class UsersService {
   }
 
   async remove(id: number): Promise<void> {
-    throw new NotFoundException('Specified user id does not exists.');
-    await this.usersRepository.softDelete(id);
+    const res = await this.usersRepository.softDelete(id);
+    if (res.affected === 0) {
+      throw new NotFoundException('Specified user id does not exists.');
+    }
   }
 
   async update(id: number, dto: UpdateUserDto): Promise<User> {

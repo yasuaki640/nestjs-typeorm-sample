@@ -71,13 +71,27 @@ describe('UsersController', () => {
       .spyOn(mockRepository, 'softDelete')
       .mockImplementation(async (id: number) => ({
         raw: null,
-        affected: null,
+        affected: 0,
         generatedMaps: [],
       }));
 
     await expect(() => {
       return controller.remove('1234567890');
     }).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
+  });
+
+  it('remove method returns not found error when specified user does not exists.', async () => {
+    jest
+      .spyOn(mockRepository, 'softDelete')
+      .mockImplementation(async (id: number) => ({
+        raw: --id,
+        affected: 1,
+        generatedMaps: [],
+      }));
+
+    await expect(() => {
+      return controller.remove('1234567890');
+    }).rejects.not.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
   });
 });
 
