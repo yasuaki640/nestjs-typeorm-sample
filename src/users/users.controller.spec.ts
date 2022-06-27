@@ -13,6 +13,11 @@ describe('UsersController', () => {
   let mockRepository: Repository<User>;
   let controller: UsersController;
 
+  const cats = [
+    { name: 'nyan', age: 3 },
+    { name: 'meow', age: 6 },
+  ];
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
