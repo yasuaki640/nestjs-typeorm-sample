@@ -2,7 +2,7 @@ import { DataSourceOptions } from 'typeorm';
 
 const ormconfigForTest: DataSourceOptions = {
   type: 'mysql',
-  host: 'localhost',
+  host: 'db',
   port: parseInt(process.env.DB_PORT, 10),
   username: 'nest',
   password: 'nest',

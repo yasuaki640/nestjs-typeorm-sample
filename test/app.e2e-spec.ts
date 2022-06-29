@@ -8,7 +8,7 @@ import ormconfigForTest from '../ormconfig.test';
 describe('AppController (e2e)', () => {
   let app: INestApplication;
 
-  jest.setTimeout(10000);
+  jest.setTimeout(100000);
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule, TypeOrmModule.forRoot(ormconfigForTest)],
