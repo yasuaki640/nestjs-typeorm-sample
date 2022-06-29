@@ -7,10 +7,11 @@ import ormconfigForTest from '../ormconfig.test';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  let moduleFixture: TestingModule;
 
-  jest.setTimeout(100000);
+  jest.setTimeout(50000);
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    moduleFixture = await Test.createTestingModule({
       imports: [AppModule, TypeOrmModule.forRoot(ormconfigForTest)],
     }).compile();
 
@@ -24,5 +25,11 @@ describe('AppController (e2e)', () => {
       .expect(200)
       .expect('Hello World!');
     return res;
+  });
+
+  // MEMO CloseしないとJestが終了しない
+  afterEach(async () => {
+    await app.close();
+    await moduleFixture.close();
   });
 });
