@@ -117,6 +117,24 @@ describe('UserController (e2e)', () => {
     expect(putRes.body.statusCode).toBe(404);
   });
 
+  it('can delete specific user', async () => {
+    const deleteTarget = await postUser(app);
+
+    await request(app.getHttpServer())
+      .delete(`/users/${deleteTarget.id}`)
+      .expect(204);
+  });
+
+  it('should return 404 if specified delete target id does not exist.', async () => {
+    const deleteRes = await request(app.getHttpServer())
+      .delete('/users/99999999999999')
+      .expect(404);
+
+    expect(deleteRes.body.error).toBe('Not Found');
+    expect(deleteRes.body.message).toBe('Specified user id does not exists.');
+    expect(deleteRes.body.statusCode).toBe(404);
+  });
+
   // MEMO CloseしないとJestが終了しない
   afterEach(async () => {
     await app.close();
