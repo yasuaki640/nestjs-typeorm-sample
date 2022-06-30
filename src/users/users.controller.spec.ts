@@ -5,9 +5,13 @@ import { FindOneOptions, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { faker } from '@faker-js/faker';
-import { CreateUserDto } from './dto/create-user.dto';
 import { NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  generateCreateUserDto,
+  generateMockUser,
+  toUserEntity,
+} from '../../test/faker/users-faker';
 
 describe('UsersController', () => {
   let mockRepository: Repository<User>;
@@ -132,35 +136,4 @@ describe('UsersController', () => {
       return controller.remove('1234567890');
     }).rejects.not.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
   });
-});
-
-const generateMockUser = (count = 1) => {
-  const users: User[] = [];
-  for (let i = 0; i < count; i++) {
-    users.push({
-      id: faker.datatype.number(),
-      firstName: faker.name.firstName(),
-      lastName: faker.name.lastName(),
-      isActive: faker.datatype.boolean(),
-      createdDate: new Date(),
-      updatedDate: new Date(),
-    });
-  }
-
-  return users;
-};
-
-const generateCreateUserDto: () => CreateUserDto = () => ({
-  firstName: faker.name.firstName(),
-  lastName: faker.name.lastName(),
-  isActive: faker.datatype.boolean(),
-});
-
-const toUserEntity: (CreateUserDto) => User = (dto) => ({
-  id: faker.datatype.number(),
-  firstName: dto.firstName,
-  lastName: dto.lastName,
-  isActive: dto.isActive,
-  createdDate: new Date(),
-  updatedDate: new Date(),
 });
