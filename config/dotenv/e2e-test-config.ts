@@ -1,8 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
-console.log('test config called');
-
 // できれば環境変数を上書きするオプションがほしいところ
 // https://github.com/motdotla/dotenv/issues/517
 const testEnv = dotenv.config({

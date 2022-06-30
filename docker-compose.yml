@@ -1,7 +1,8 @@
 version: "3.8"
 volumes:
   db-store:
-  test-db-store:
+  testdb-store:
+  node_modules-store:
 services:
   backend:
     build:
@@ -11,6 +12,9 @@ services:
       - type: bind
         source: .
         target: /backend
+      - type: volume
+        source: node_modules-store
+        target: /backend/node_modules
     ports:
       - target: 3000
         published: 3000
@@ -37,7 +41,7 @@ services:
       - MYSQL_USER=nest
       - MYSQL_PASSWORD=nest
       - MYSQL_ROOT_PASSWORD=nest
-  test-db:
+  testdb:
     build:
       context: .
       dockerfile: ./docker/db/Dockerfile
@@ -48,7 +52,7 @@ services:
         mode: host
     volumes:
       - type: volume
-        source: test-db-store
+        source: testdb-store
         target: /var/lib/mysql
         volume:
           nocopy: true
