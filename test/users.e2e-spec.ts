@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../src/users/entities/user.entity';
 import { UsersModule } from '../src/users/users.module';
 import { generateCreateUserDto } from './faker/users-faker';
+import { ErrorResponse } from './type/http';
 
 describe('UserController (e2e)', () => {
   let app: INestApplication;
@@ -30,8 +31,33 @@ describe('UserController (e2e)', () => {
     await app.init();
   });
 
-  it('can persist one user', async () => {
+  it('can get user has specific id', async () => {
     const expected = await postUser(app);
+    const getAllRes: { body: User[] } = await request(app.getHttpServer())
+      .get(`/users/${expected.id}`)
+      .expect(200);
+
+    expect(getAllRes.body).toEqual(expected);
+  });
+
+  it('should return 404 if specified id does not exist.', async () => {
+    const getRes: { body: ErrorResponse } = await request(app.getHttpServer())
+      .get('/users/9999999999999')
+      .expect(404);
+
+    expect(getRes.body.error).toBe('Not Found');
+    expect(getRes.body.message).toBe("Specified user doesn't exists");
+    expect(getRes.body.statusCode).toBe(404);
+  });
+
+  it('can persist one user', async () => {
+    const postRes = await request(app.getHttpServer())
+      .post('/users')
+      .send(generateCreateUserDto())
+      .expect(201);
+
+    const expected = postRes.body;
+
     const getAllRes: { body: User[] } = await request(app.getHttpServer())
       .get('/users')
       .expect(200);
