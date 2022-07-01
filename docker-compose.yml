@@ -1,7 +1,6 @@
 version: "3.8"
 volumes:
   db-store:
-  testdb-store:
   node_modules-store:
 services:
   backend:
@@ -41,23 +40,3 @@ services:
       - MYSQL_USER=nest
       - MYSQL_PASSWORD=nest
       - MYSQL_ROOT_PASSWORD=nest
-  testdb:
-    build:
-      context: .
-      dockerfile: ./docker/db/Dockerfile
-    ports:
-      - target: 3306
-        published: 33060
-        protocol: tcp
-        mode: host
-    volumes:
-      - type: volume
-        source: testdb-store
-        target: /var/lib/mysql
-        volume:
-          nocopy: true
-    environment:
-      - MYSQL_DATABASE=test
-      - MYSQL_USER=test
-      - MYSQL_PASSWORD=test
-      - MYSQL_ROOT_PASSWORD=test

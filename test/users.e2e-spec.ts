@@ -12,7 +12,6 @@ describe('UserController (e2e)', () => {
   let app: INestApplication;
   let moduleFixture: TestingModule;
 
-  jest.setTimeout(50000);
   beforeEach(async () => {
     moduleFixture = await Test.createTestingModule({
       imports: [
@@ -20,7 +19,7 @@ describe('UserController (e2e)', () => {
         TypeOrmModule.forRoot({
           // sqliteで妥協する
           type: 'sqlite',
-          database: ':memory:',
+          database: process.env.DB_FILENAME,
           entities: [User],
           logging: true,
           synchronize: true,
@@ -123,6 +122,10 @@ describe('UserController (e2e)', () => {
     await request(app.getHttpServer())
       .delete(`/users/${deleteTarget.id}`)
       .expect(204);
+
+    await request(app.getHttpServer())
+      .get(`/users/${deleteTarget.id}`)
+      .expect(404);
   });
 
   it('should return 404 if specified delete target id does not exist.', async () => {
