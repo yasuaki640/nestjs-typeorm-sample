@@ -48,9 +48,11 @@ describe('UsersController', () => {
 
   it('findOne method returns not found error when specified user does not exists.', async () => {
     jest.spyOn(mockRepository, 'findOne').mockImplementation(async () => null);
-    await expect(() => {
-      return controller.findOne('1234567890');
-    }).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
+
+    expect.assertions(1);
+    await expect(
+      async () => await controller.findOne('1234567890'),
+    ).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
   });
 
   it('findOne method returns a user.', async () => {
@@ -82,9 +84,10 @@ describe('UsersController', () => {
 
     const dto = generateCreateUserDto();
 
-    await expect(() => {
-      return controller.update('1234567890', dto);
-    }).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
+    expect.assertions(1);
+    await expect(
+      async () => await controller.update('1234567890', dto),
+    ).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
   });
 
   it('update method executed successfully.', async () => {
@@ -109,7 +112,6 @@ describe('UsersController', () => {
     const user: User = generateMockUser().pop();
     const dto: UpdateUserDto = { firstName: faker.name.firstName() };
     const res = await controller.update(user.id.toString(), dto);
-
     expect(res.id).toEqual(user.id);
   });
 
@@ -120,20 +122,37 @@ describe('UsersController', () => {
       generatedMaps: [],
     }));
 
-    await expect(() => {
-      return controller.remove('1234567890');
-    }).rejects.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
+    expect.assertions(1);
+    await expect(
+      async () => await controller.remove('1234567890'),
+    ).rejects.toThrow(NotFoundException);
   });
 
-  it('remove method returns not found error when specified user does not exists.', async () => {
+  it('remove method executed successfully.', async () => {
     jest.spyOn(mockRepository, 'softDelete').mockImplementation(async (id) => ({
       raw: id,
       affected: 1,
       generatedMaps: [],
     }));
 
-    await expect(() => {
-      return controller.remove('1234567890');
-    }).rejects.not.toThrow(NotFoundException); // https://jestjs.io/docs/asynchronous#resolves--rejects
+    const res = await controller.remove('1234567890');
+    expect(res);
+
+    expect(await controller.remove('1234567890')).toBeUndefined();
+  });
+
+  it('for article', () => {
+    const expected = {
+      id: faker.datatype.number(),
+      firstName: faker.name.firstName(),
+      lastName: faker.name.lastName(),
+      isActive: faker.datatype.boolean(),
+      createdDate: new Date(),
+      updatedDate: new Date(),
+    };
+
+    jest
+      .spyOn(mockRepository, 'findOne')
+      .mockImplementation(async () => expected);
   });
 });

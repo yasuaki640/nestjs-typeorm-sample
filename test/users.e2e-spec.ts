@@ -17,11 +17,9 @@ describe('UserController (e2e)', () => {
       imports: [
         UsersModule,
         TypeOrmModule.forRoot({
-          // sqliteで妥協する
           type: 'sqlite',
           database: process.env.DB_FILENAME,
           entities: [User],
-          logging: true,
           synchronize: true,
         }),
       ],
