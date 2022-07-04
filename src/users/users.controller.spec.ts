@@ -46,7 +46,7 @@ describe('UsersController', () => {
     expect(res).toEqual(expected);
   });
 
-  it('findOne method returns not found error when specified user does not exists.', async () => {
+  it('findOne method throws not found error when specified user does not exists.', async () => {
     jest.spyOn(mockRepository, 'findOne').mockImplementation(async () => null);
 
     expect.assertions(1);
@@ -73,7 +73,7 @@ describe('UsersController', () => {
     expect(await controller.create(dto)).toEqual(expect.objectContaining(dto));
   });
 
-  it('update method returns not found error when specified user does not exists.', async () => {
+  it('update method throws not found error when specified user does not exists.', async () => {
     jest
       .spyOn(mockRepository, 'update')
       .mockImplementation(async (id, dto) => ({
@@ -115,7 +115,7 @@ describe('UsersController', () => {
     expect(res.id).toEqual(user.id);
   });
 
-  it('remove method returns not found error when specified user does not exists.', async () => {
+  it('remove method throws not found error when specified user does not exists.', async () => {
     jest.spyOn(mockRepository, 'softDelete').mockImplementation(async (id) => ({
       raw: null,
       affected: 0,
@@ -139,20 +139,5 @@ describe('UsersController', () => {
     expect(res);
 
     expect(await controller.remove('1234567890')).toBeUndefined();
-  });
-
-  it('for article', () => {
-    const expected = {
-      id: faker.datatype.number(),
-      firstName: faker.name.firstName(),
-      lastName: faker.name.lastName(),
-      isActive: faker.datatype.boolean(),
-      createdDate: new Date(),
-      updatedDate: new Date(),
-    };
-
-    jest
-      .spyOn(mockRepository, 'findOne')
-      .mockImplementation(async () => expected);
   });
 });
