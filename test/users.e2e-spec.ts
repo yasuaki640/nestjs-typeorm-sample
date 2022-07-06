@@ -80,8 +80,13 @@ describe('UserController (e2e)', () => {
     expect(getAllRes.body[2]).toEqual(expected[2]);
   });
 
-  it('can update specific user', async () => {
-    const created = await postUser(app);
+  it('can register and update specific user', async () => {
+    const createRes: { body: User } = await request(app.getHttpServer())
+      .post('/users')
+      .send(generateCreateUserDto())
+      .expect(201);
+
+    const created = createRes.body;
 
     const updateData: UpdateUserDto = {
       firstName: 'modified first name',
